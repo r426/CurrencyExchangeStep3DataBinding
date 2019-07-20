@@ -1,4 +1,4 @@
-package com.ryeslim.currencyexchangeviewmodel
+package com.ryeslim.currencyexchangedatabinding
 
 import androidx.lifecycle.ViewModel
 import java.math.BigDecimal
@@ -6,9 +6,13 @@ import java.math.RoundingMode
 
 class CurrencyViewModel : ViewModel() {
 
-    var balance = arrayOf(BigDecimal(1000), BigDecimal(0), BigDecimal(0))
-    var commission = arrayOf(BigDecimal(0), BigDecimal(0), BigDecimal(0))
-    val currency = arrayOf("EUR", "USD", "JPY")
+    val euro = Currency(1000.toBigDecimal(), 0.toBigDecimal(), "EUR")
+    val dollar = Currency(0.toBigDecimal(), 0.toBigDecimal(), "USD")
+    val yen = Currency(0.toBigDecimal(), 0.toBigDecimal(), "JPY")
+    var infoMessage = ""
+
+    val currencies = arrayOf(euro, dollar, yen)
+
     var amountFrom = -1.toBigDecimal()
     var amountResult = 0.toBigDecimal()
     var indexFrom = -1
@@ -16,11 +20,11 @@ class CurrencyViewModel : ViewModel() {
     var url = ""
     var thisCommission = 0.toBigDecimal()
     var numberOfOperations = 0
-    var infoMessage = ""
+
 
     fun makeUrl() {
         var url: String =
-            "http://api.evp.lt/currency/commercial/exchange/$amountFrom-${currency[indexFrom]}/${currency[indexTo]}/latest"
+            "http://api.evp.lt/currency/commercial/exchange/$amountFrom-${currencies[indexFrom].currencyCode}/${currencies[indexTo].currencyCode}/latest"
     }
 
     fun getResultFromNetwork() {
@@ -32,10 +36,12 @@ class CurrencyViewModel : ViewModel() {
     }
 
     fun calculateValues() {
-        balance[indexFrom] =
-            balance[indexFrom] - amountFrom - thisCommission
-        balance[indexTo] = balance[indexTo] + amountResult
-        commission[indexFrom] += thisCommission
+        currencies[indexFrom].balanceValue =
+            currencies[indexFrom].balanceValue.minus(amountFrom).minus(thisCommission)
+
+        currencies[indexTo].balanceValue = currencies[indexTo].balanceValue.plus(amountResult)
+
+        currencies[indexFrom].commissionsValue = currencies[indexFrom].commissionsValue.plus(thisCommission)
     }
 
     fun calculateCommission() {
@@ -54,11 +60,11 @@ class CurrencyViewModel : ViewModel() {
         infoMessage = String.format(
             "You converted %.2f %s to %.2f %s. Commissions paid: %.2f %s",
             amountFrom,
-            currency[indexFrom],
+            currencies[indexFrom].currencyCode,
             amountResult,
-            currency[indexTo],
+            currencies[indexTo].currencyCode,
             thisCommission,
-            currency[indexFrom]
+            currencies[indexFrom].currencyCode
         )
     }
 }

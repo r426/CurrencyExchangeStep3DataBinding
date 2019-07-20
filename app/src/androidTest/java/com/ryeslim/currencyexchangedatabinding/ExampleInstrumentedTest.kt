@@ -1,4 +1,4 @@
-package com.ryeslim.currencyexchangeviewmodel
+package com.ryeslim.currencyexchangedatabinding
 
 import androidx.test.InstrumentationRegistry
 import androidx.test.runner.AndroidJUnit4
